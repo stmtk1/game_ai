@@ -33,13 +33,13 @@ impl MazeState {
     fn new(seed: u64) -> MazeState {
         let mut rng: StdRng = SeedableRng::seed_from_u64(seed);
         let coord = Coord {
-            x: TryInto::<i64>::try_into(rng.next_u64()).unwrap() % H,
-            y: TryInto::<i64>::try_into(rng.next_u64()).unwrap() % W,
+            x: TryInto::<i64>::try_into(rng.next_u64() & 0xffff).unwrap() % W,
+            y: TryInto::<i64>::try_into(rng.next_u64() & 0xffff).unwrap() % H,
         };
 
-        let mut points: Vec<Vec<u64>> = (0..H).map(|_| (0..W).map(|_| 0).collect()).collect();
-        for i in 0..H {
-            for j in 0..W {
+        let mut points: Vec<Vec<u64>> = (0..W).map(|_| (0..H).map(|_| 0).collect()).collect();
+        for i in 0..W {
+            for j in 0..H {
                 if i == coord.x  && j == coord.y {
                     continue;
                 }
@@ -63,10 +63,10 @@ impl MazeState {
     fn advance(&mut self, action: usize) {
         self.coord.x += DX[action];
         self.coord.y += DY[action];
-        let point = self.points[TryInto::<usize>::try_into(self.coord.x).unwrap()][TryInto::<usize>::try_into(self.coord.y).unwrap()];
+        let point = self.points[TryInto::<usize>::try_into(self.coord.x.abs()).unwrap()][TryInto::<usize>::try_into(self.coord.y.abs()).unwrap()];
         if point > 0 {
             self.game_score += point;
-            self.points[TryInto::<usize>::try_into(self.coord.x).unwrap()][TryInto::<usize>::try_into(self.coord.y).unwrap()] = 0;
+            self.points[TryInto::<usize>::try_into(self.coord.x.abs()).unwrap()][TryInto::<usize>::try_into(self.coord.y.abs()).unwrap()] = 0;
         }
         self.tern += 1;
     }
